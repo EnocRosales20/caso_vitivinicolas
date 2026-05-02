@@ -1,0 +1,138 @@
+<section class="almacen-page">
+
+  <div class="page-header">
+    <div>
+      <span class="badge bg-danger">Módulo logístico</span>
+      <h1>Módulo de Almacén</h1>
+      <p>Consulte stock, inventario y ubicación de productos.</p>
+    </div>
+
+    <a routerLink="/dashboard" class="btn btn-outline-danger">
+      Volver al dashboard
+    </a>
+  </div>
+
+  <div class="row g-4 mb-4">
+
+    <div class="col-md-4">
+      <div class="summary-card">
+        <span>Productos registrados</span>
+        <h3>{{ totalProductos }}</h3>
+        <p>Ítems en inventario</p>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="summary-card">
+        <span>Stock total</span>
+        <h3>{{ stockTotal }}</h3>
+        <p>Unidades disponibles</p>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="summary-card highlight">
+        <span>Stock bajo</span>
+        <h3>{{ stockBajo }}</h3>
+        <p>Productos por reponer</p>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="card custom-card">
+    <div class="card-body p-4">
+
+      <div class="section-title">
+        <div>
+          <h2>Consulta de stock</h2>
+          <p class="text-muted">Filtre productos por nombre, categoría o almacén.</p>
+        </div>
+
+        <button class="btn btn-outline-danger" type="button" (click)="limpiarFiltros()">
+          Limpiar filtros
+        </button>
+      </div>
+
+      <div class="row g-3 mb-4">
+
+        <div class="col-md-3">
+          <label class="form-label">Producto</label>
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Buscar producto"
+            [(ngModel)]="buscarProducto">
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">Categoría</label>
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Ej. Bebidas"
+            [(ngModel)]="buscarCategoria">
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">Almacén</label>
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Ej. Bodega Sur"
+            [(ngModel)]="buscarAlmacen">
+        </div>
+
+        <div class="col-md-3 d-flex align-items-end">
+          <button class="btn btn-danger w-100" type="button">
+            Consultar
+          </button>
+        </div>
+
+      </div>
+
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Producto</th>
+              <th>Categoría</th>
+              <th>Almacén</th>
+              <th>Stock</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let item of productosFiltrados">
+              <td class="fw-bold">{{ item.codigo }}</td>
+              <td>{{ item.producto }}</td>
+              <td>{{ item.categoria }}</td>
+              <td>{{ item.almacen }}</td>
+              <td>{{ item.stock }}</td>
+              <td>
+                <span
+                  class="badge"
+                  [class.bg-success]="item.stock > 50"
+                  [class.bg-warning]="item.stock <= 50 && item.stock > 20"
+                  [class.bg-danger]="item.stock <= 20"
+                >
+                  {{ item.stock > 50 ? 'Disponible' : item.stock > 20 ? 'Bajo' : 'Crítico' }}
+                </span>
+              </td>
+            </tr>
+
+            <tr *ngIf="productosFiltrados.length === 0">
+              <td colspan="6" class="text-center text-muted py-4">
+                No se encontraron productos con los filtros aplicados.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+</section>

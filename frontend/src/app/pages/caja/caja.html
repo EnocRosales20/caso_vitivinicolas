@@ -1,0 +1,154 @@
+<section class="caja-page">
+
+  <div class="page-header">
+    <div>
+      <span class="badge bg-danger">Módulo operativo</span>
+      <h1>Módulo de Caja</h1>
+      <p>Registre depósitos, retiros y movimientos de caja.</p>
+    </div>
+
+    <a routerLink="/dashboard" class="btn btn-outline-danger">
+      Volver al dashboard
+    </a>
+  </div>
+
+  <div class="row g-4 mb-4">
+
+    <div class="col-md-4">
+      <div class="summary-card">
+        <span>Ingresos</span>
+        <h3>S/ {{ totalIngresos }}</h3>
+        <p>Depósitos registrados</p>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="summary-card">
+        <span>Retiros</span>
+        <h3>S/ {{ totalRetiros }}</h3>
+        <p>Salidas de caja</p>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="summary-card highlight">
+        <span>Saldo actual</span>
+        <h3>S/ {{ saldoCaja }}</h3>
+        <p>Balance disponible</p>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="row g-4">
+
+    <div class="col-lg-5">
+      <div class="card custom-card">
+        <div class="card-body p-4">
+          <h2>Registrar movimiento</h2>
+          <p class="text-muted">Complete los datos del movimiento de caja.</p>
+
+          <form (ngSubmit)="registrarMovimiento()">
+
+            <div class="mb-3">
+              <label class="form-label">Tipo de movimiento</label>
+              <select class="form-select" [(ngModel)]="movimiento.tipo" name="tipo">
+                <option value="">Seleccione tipo</option>
+                <option value="Depósito">Depósito</option>
+                <option value="Retiro">Retiro</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Cuenta / Caja</label>
+              <select class="form-select" [(ngModel)]="movimiento.cuenta" name="cuenta">
+                <option value="">Seleccione cuenta</option>
+                <option value="Caja Principal">Caja Principal</option>
+                <option value="Cuenta Corriente">Cuenta Corriente</option>
+                <option value="Cuenta de Ahorro">Cuenta de Ahorro</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Monto</label>
+              <input
+                type="number"
+                class="form-control"
+                placeholder="Ingrese monto"
+                [(ngModel)]="movimiento.monto"
+                name="monto">
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Fecha</label>
+              <input
+                type="date"
+                class="form-control"
+                [(ngModel)]="movimiento.fecha"
+                name="fecha">
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Motivo</label>
+              <input
+                type="text"
+                class="form-control"
+                placeholder="Ingrese motivo del movimiento"
+                [(ngModel)]="movimiento.motivo"
+                name="motivo">
+            </div>
+
+            <button type="submit" class="btn btn-danger w-100">
+              Registrar movimiento
+            </button>
+
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-7">
+      <div class="card custom-card">
+        <div class="card-body p-4">
+          <h2>Movimientos recientes</h2>
+          <p class="text-muted">Historial temporal de movimientos registrados.</p>
+
+          <div class="table-responsive">
+            <table class="table align-middle">
+              <thead>
+                <tr>
+                  <th>Tipo</th>
+                  <th>Cuenta</th>
+                  <th>Monto</th>
+                  <th>Fecha</th>
+                  <th>Motivo</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                <tr *ngFor="let item of movimientos">
+                  <td>
+                    <span
+                      class="badge"
+                      [class.bg-success]="item.tipo === 'Depósito'"
+                      [class.bg-warning]="item.tipo === 'Retiro'"
+                    >
+                      {{ item.tipo }}
+                    </span>
+                  </td>
+                  <td>{{ item.cuenta }}</td>
+                  <td>S/ {{ item.monto }}</td>
+                  <td>{{ item.fecha }}</td>
+                  <td>{{ item.motivo }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</section>
