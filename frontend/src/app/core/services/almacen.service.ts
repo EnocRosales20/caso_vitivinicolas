@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -11,20 +11,23 @@ export class AlmacenService {
 
   constructor(private http: HttpClient) {}
 
-  // 1. Trae todos los productos
   listarTodos(): Observable<any> {
     return this.http.get(this.apiUrl);
   }
 
-  // 2. ACTUALIZAR STOCK
   actualizarStock(id: number, cantidad: number): Observable<any> {
     return this.http.put(`${this.apiUrl}/${id}/stock`, cantidad);
   }
 
-  // 3. FILTRAR STOCK (Consolidado: acepta los 3 parámetros)
   filtrarStock(nombre: string, categoria: string, ubicacion: string): Observable<any> {
-    return this.http.get(
-      `${this.apiUrl}/filtrar?nombre=${nombre}&categoria=${categoria}&ubicacion=${ubicacion}`
-    );
+    // Construimos los parámetros de forma limpia
+    let params = new HttpParams();
+    
+    if (nombre) params = params.set('nombre', nombre);
+    if (categoria) params = params.set('categoria', categoria);
+    if (ubicacion) params = params.set('ubicacion', ubicacion);
+
+    // Angular codifica automáticamente los espacios y caracteres especiales
+    return this.http.get(`${this.apiUrl}/filtrar`, { params });
   }
 }

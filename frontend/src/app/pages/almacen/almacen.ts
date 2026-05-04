@@ -1,16 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AlmacenService } from '../../core/services/almacen.service';
 
-// IMPORTANTE: Agregué el 'id' a la interfaz, es vital para actualizar
 interface Producto {
-  id: number; 
+  id: number;
   codigo: string;
-  producto: string; // Este nombre coincide con tu @JsonProperty("producto")
+  nombre: string;
   categoria: string;
-  almacen: string; // Este nombre coincide con tu @JsonProperty("almacen")
+  ubicacion: string;
   stock: number;
 }
 
@@ -28,27 +27,29 @@ export class Almacen implements OnInit {
 
   productos: Producto[] = [];
 
-  constructor(private almacenService: AlmacenService) {}
+  constructor(
+    private almacenService: AlmacenService,
+    private cdr: ChangeDetectorRef // Inyectamos el detector de cambios
+  ) {}
 
   ngOnInit() {
-    this.cargarProductos(); // Usamos el nombre estandarizado
+    this.cargarProductos();
   }
 
-  // Método unificado para cargar la lista
   cargarProductos() {
     this.almacenService.listarTodos().subscribe((data: Producto[]) => {
       this.productos = data;
+      this.cdr.detectChanges(); // Forzamos la actualización visual
     });
   }
 
-  // En tu método buscarBackend() dentro de almacen.ts
   buscarBackend() {
     this.almacenService
-    // Ahora pasamos 3 variables. Si una está vacía, el Backend la tratará como ""
-    .filtrarStock(this.buscarProducto, this.buscarCategoria, this.buscarAlmacen)
-    .subscribe((data: any) => {
-      this.productos = data;
-    });
+      .filtrarStock(this.buscarProducto, this.buscarCategoria, this.buscarAlmacen)
+      .subscribe((data: Producto[]) => {
+        this.productos = data;
+        this.cdr.detectChanges(); // Forzamos la actualización al filtrar
+      });
   }
 
   limpiarFiltros() {
@@ -62,8 +63,7 @@ export class Almacen implements OnInit {
     this.almacenService.actualizarStock(item.id, item.stock).subscribe({
       next: () => {
         alert("Stock actualizado correctamente");
-        // Recargamos la lista para ver los cambios
-        this.cargarProductos(); 
+        this.cargarProductos();
       },
       error: (err) => {
         console.error(err);
@@ -72,8 +72,6 @@ export class Almacen implements OnInit {
     });
   }
 
-  // --- MÉTODOS PARA LAS TARJETAS DE RESUMEN ---
-  
   get totalProductos() {
     return this.productos.length;
   }
@@ -83,6 +81,6 @@ export class Almacen implements OnInit {
   }
 
   get stockBajo() {
-    return this.productos.filter(p => p.stock <= 20).length; // Ajusté a 20 para que coincida con tu badge de "Crítico"
+    return this.productos.filter(p => p.stock <= 20).length;
   }
 }

@@ -2,7 +2,6 @@ package com.vitivinicolas.backend.controller;
 
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
-
 import com.vitivinicolas.backend.model.Producto;
 import com.vitivinicolas.backend.repository.ProductoRepository;
 
@@ -16,14 +15,11 @@ public class ProductoController {
         this.repo = repo;
     }
 
-    // 1. Listar todos
     @GetMapping
     public List<Producto> listarTodos() {
         return repo.findAll();
     }
 
-    // 2. Filtrar avanzado (3 parámetros)
-    // Este método reemplaza al anterior que solo tenía 2
     @GetMapping("/filtrar")
     public List<Producto> filtrar(
             @RequestParam(defaultValue = "") String nombre,
@@ -34,7 +30,6 @@ public class ProductoController {
                 nombre, categoria, ubicacion);
     }
 
-    // 3. Actualizar stock
     @PutMapping("/{id}/stock")
     public Producto actualizarStock(@PathVariable Long id, @RequestBody int cantidad) {
         Producto producto = repo.findById(id)

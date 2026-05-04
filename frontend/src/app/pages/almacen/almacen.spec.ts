@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClient } from '@angular/common/http'; // <-- Importación moderna
+import { provideHttpClientTesting } from '@angular/common/http/testing'; // <-- Importación moderna
 import { FormsModule } from '@angular/forms';
+import { provideRouter } from '@angular/router'; 
 import { Almacen } from './almacen';
 import { AlmacenService } from '../../core/services/almacen.service'; 
 
@@ -10,22 +12,20 @@ describe('Almacen', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      // Importamos los módulos necesarios para que el componente funcione
       imports: [
-        Almacen,                
-        HttpClientTestingModule, 
-        FormsModule              
+        Almacen,             
+        FormsModule            
       ],
-      // Proveemos el servicio para que pueda ser inyectado sin errores
       providers: [
-        AlmacenService
+        AlmacenService,
+        provideRouter([]),
+        provideHttpClient(), // <-- Proveedor moderno
+        provideHttpClientTesting() // <-- Proveedor moderno de pruebas
       ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(Almacen);
     component = fixture.componentInstance;
-    
-    // Detectamos cambios para inicializar el componente
     fixture.detectChanges();
   });
 

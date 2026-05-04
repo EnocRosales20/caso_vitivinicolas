@@ -15,10 +15,10 @@ public class Producto {
     private String ubicacion;
     private int stock;
 
-    // 1. Constructor vacío (Obligatorio para Hibernate/JPA)
+    // Obligatorio para JPA
     public Producto() {}
 
-    // 2. Constructor con parámetros (El que te faltaba para DataInitializer)
+    // Constructor completo
     public Producto(String codigo, String nombre, String categoria, String ubicacion, int stock) {
         this.codigo = codigo;
         this.nombre = nombre;
@@ -35,7 +35,7 @@ public class Producto {
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }
     public String getCategoria() { return categoria; }
-    public String getCategoria(String categoria) { return categoria; }
+    public void setCategoria(String categoria) { this.categoria = categoria; }
     public String getUbicacion() { return ubicacion; }
     public void setUbicacion(String ubicacion) { this.ubicacion = ubicacion; }
     public int getStock() { return stock; }

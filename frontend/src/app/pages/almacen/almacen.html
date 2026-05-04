@@ -24,7 +24,7 @@
     </div>
     <div class="col-md-4">
       <div class="summary-card highlight">
-        <span>Stock bajo</span>
+        <span>Productos con Stock Crítico</span>
         <h3>{{ stockBajo }}</h3>
       </div>
     </div>
@@ -72,27 +72,18 @@
               <th>Categoría</th>
               <th>Almacén</th>
               <th>Stock</th>
-              <th>Acción</th> <th>Estado</th>
+              <th>Estado</th>
             </tr>
           </thead>
 
           <tbody>
             <tr *ngFor="let item of productos">
               <td class="fw-bold">{{ item.codigo }}</td>
-              <td>{{ item.producto }}</td>
+              <td>{{ item.nombre }}</td>
               <td>{{ item.categoria }}</td>
-              <td>{{ item.almacen }}</td>
-              
-              <td>
-                <div class="d-flex gap-2">
-                  <input type="number" class="form-control form-control-sm" style="width: 70px;" [(ngModel)]="item.stock">
-                </div>
-              </td>
-              <td>
-                <button class="btn btn-sm btn-success" (click)="actualizarStock(item)">
-                  Guardar
-                </button>
-              </td>
+              <td>{{ item.ubicacion }}</td>
+  
+              <td>{{ item.stock }}</td>
 
               <td>
                 <span class="badge" [class.bg-success]="item.stock > 50"
