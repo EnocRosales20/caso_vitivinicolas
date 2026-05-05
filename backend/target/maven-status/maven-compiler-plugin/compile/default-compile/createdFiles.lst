@@ -1,0 +1,5 @@
+com\vitivinicolas\backend\repository\ProductoRepository.class
+com\vitivinicolas\backend\controller\ProductoController.class
+com\vitivinicolas\backend\model\Producto.class
+com\vitivinicolas\backend\BackendApplication.class
+com\vitivinicolas\backend\config\CorsConfig.class
