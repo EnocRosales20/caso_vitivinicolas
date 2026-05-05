@@ -99,3 +99,7 @@ INSERT INTO producto (codigo, nombre, categoria, ubicacion, stock) VALUES
 ('VIN-098', 'Oporto Blanco', 'Fortificados', 'Bodega Norte', 14),
 ('VIN-099', 'Anisado Dulce', 'Licores', 'Bodega Norte', 20),
 ('VIN-100', 'Mistela de Uva', 'Fortificados', 'Bodega Norte', 60);
+
+INSERT INTO cuenta_bancaria (nombre_banco, numero_cuenta, tipo_cuenta, saldo, moneda, fecha_apertura, titular) VALUES
+('BCP', '001-456789123', 'CORRIENTE', 80000, 'CLP', '2024-01-15', 'Empresa Vitivinícola'),
+('BBVA', '002-987654321', 'AHORRO', 44500, 'CLP', '2024-02-20', 'Empresa Vitivinícola');
