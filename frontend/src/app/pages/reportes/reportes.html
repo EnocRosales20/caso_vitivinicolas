@@ -1,0 +1,164 @@
+<section class="reportes-page">
+
+  <div class="page-header">
+    <div>
+      <span class="badge bg-danger">Módulo gerencial</span>
+      <h1>Reportes Empresariales</h1>
+      <p>Genere y revise reportes de caja, almacén, cuentas y movimientos.</p>
+    </div>
+
+    <a routerLink="/dashboard" class="btn btn-outline-danger">
+      Volver al dashboard
+    </a>
+  </div>
+
+  <div class="row g-4 mb-4">
+
+    <div class="col-md-4">
+      <div class="summary-card highlight">
+        <span>Total reportes</span>
+        <h3>{{ totalReportes }}</h3>
+        <p>Reportes registrados</p>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="summary-card">
+        <span>Generados</span>
+        <h3>{{ generados }}</h3>
+        <p>Reportes listos para revisión</p>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="summary-card">
+        <span>Pendientes</span>
+        <h3>{{ pendientes }}</h3>
+        <p>Reportes en proceso</p>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="row g-4 mb-4">
+
+    <div class="col-md-3">
+      <div class="report-action-card">
+        <div class="report-icon">💰</div>
+        <h2>Caja</h2>
+        <p>Resumen de ingresos, retiros y saldo.</p>
+        <button class="btn btn-danger w-100" (click)="generarReporte('Caja')">
+          Generar
+        </button>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="report-action-card">
+        <div class="report-icon">📦</div>
+        <h2>Almacén</h2>
+        <p>Stock, productos críticos e inventario.</p>
+        <button class="btn btn-danger w-100" (click)="generarReporte('Almacén')">
+          Generar
+        </button>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="report-action-card">
+        <div class="report-icon">🏦</div>
+        <h2>Cuentas</h2>
+        <p>Saldos bancarios y cuentas pendientes.</p>
+        <button class="btn btn-danger w-100" (click)="generarReporte('Cuentas')">
+          Generar
+        </button>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="report-action-card">
+        <div class="report-icon">📋</div>
+        <h2>Guías</h2>
+        <p>Compras, ventas y traslados registrados.</p>
+        <button class="btn btn-danger w-100" (click)="generarReporte('Guías')">
+          Generar
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="card custom-card">
+    <div class="card-body p-4">
+
+      <div class="section-title">
+        <div>
+          <h2>Historial de reportes</h2>
+          <p class="text-muted">Listado temporal de reportes generados.</p>
+        </div>
+
+        <div class="filters">
+          <select class="form-select" [(ngModel)]="filtroTipo" name="filtroTipo">
+            <option value="">Todos</option>
+            <option value="Caja">Caja</option>
+            <option value="Almacén">Almacén</option>
+            <option value="Cuentas">Cuentas</option>
+            <option value="Guías">Guías</option>
+          </select>
+
+          <button class="btn btn-outline-danger" (click)="limpiarFiltro()">
+            Limpiar
+          </button>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Tipo</th>
+              <th>Periodo</th>
+              <th>Responsable</th>
+              <th>Estado</th>
+              <th>Fecha</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let reporte of reportesFiltrados">
+              <td class="fw-bold">{{ reporte.codigo }}</td>
+              <td>{{ reporte.tipo }}</td>
+              <td>{{ reporte.periodo }}</td>
+              <td>{{ reporte.responsable }}</td>
+              <td>
+                <span
+                  class="badge"
+                  [class.bg-success]="reporte.estado === 'Generado'"
+                  [class.bg-warning]="reporte.estado === 'Pendiente'"
+                  [class.bg-info]="reporte.estado === 'Revisado'"
+                >
+                  {{ reporte.estado }}
+                </span>
+              </td>
+              <td>{{ reporte.fecha }}</td>
+            </tr>
+
+            <tr *ngIf="reportesFiltrados.length === 0">
+              <td colspan="6" class="text-center text-muted py-4">
+                No se encontraron reportes.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="logic-note">
+        <strong>Lógica del caso:</strong>
+        este módulo resume la información operativa de caja, almacén, cuentas y guías para apoyar la toma de decisiones del dueño o administrador.
+      </div>
+
+    </div>
+  </div>
+
+</section>

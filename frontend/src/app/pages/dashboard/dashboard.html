@@ -1,0 +1,173 @@
+<nav class="topbar">
+  <div class="brand">
+    <div class="brand-icon">🍷</div>
+    <div>
+      <h3>Vitivinícolas Perú</h3>
+      <p>Sistema de Gestión Empresarial</p>
+    </div>
+  </div>
+
+  <div class="topbar-actions">
+    <input
+      type="text"
+      class="search-input"
+      placeholder="Buscar módulos..."
+      (input)="updateSearch($event)"
+    />
+
+    <!-- Tema -->
+    <div class="theme-menu">
+      <button class="theme-btn" type="button" (click)="toggleThemeMenu()">
+        {{ temaIcono() }}
+      </button>
+
+      <div class="theme-dropdown" *ngIf="themeMenuOpen()">
+        <button type="button" (click)="cambiarTemaDirecto('light')">
+          ☀️ <span>Light</span>
+        </button>
+
+        <button type="button" (click)="cambiarTemaDirecto('dark')">
+          🌙 <span>Dark</span>
+        </button>
+
+        <button type="button" (click)="cambiarTemaDirecto('system')">
+          🖥️ <span>System</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Notificaciones -->
+    <div class="dropdown">
+      <button
+        class="btn btn-sm btn-outline-light position-relative"
+        type="button"
+        data-bs-toggle="dropdown"
+        aria-expanded="false"
+      >
+        🔔
+        <span
+          class="position-absolute top-0 start-100 translate-middle badge rounded-pill"
+          style="background-color: #c09a4a; font-size: 9px;"
+          *ngIf="notifNoLeidas() > 0"
+        >
+          {{ notifNoLeidas() }}
+        </span>
+      </button>
+
+      <div class="dropdown-menu dropdown-menu-end p-0" style="width: 300px; min-width: 300px;">
+        <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom">
+          <span class="fw-semibold" style="font-size: 13px;">Notificaciones</span>
+          <button class="btn btn-link btn-sm p-0 text-danger" style="font-size: 12px;" (click)="marcarTodasLeidas()">
+            Marcar todas leídas
+          </button>
+        </div>
+
+        <div *ngFor="let n of notificaciones()"
+             class="d-flex gap-2 align-items-start px-3 py-2 border-bottom"
+             [class.bg-danger-subtle]="!n.leida"
+             style="cursor: pointer; font-size: 12px;">
+          <span class="mt-1 rounded-circle flex-shrink-0"
+                [style.background]="n.leida ? 'transparent' : '#7a1c2e'"
+                [style.border]="n.leida ? '1.5px solid #ccc' : 'none'"
+                style="width: 8px; height: 8px; display: inline-block;">
+          </span>
+          <div>
+            <p class="mb-0">{{ n.texto }}</p>
+            <small class="text-muted">{{ n.tiempo }}</small>
+          </div>
+        </div>
+
+        <div class="text-center py-2">
+          <a href="#" class="text-decoration-none" style="font-size: 12px; color: #7a1c2e;">
+            Ver todas las notificaciones
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Usuario -->
+    <div class="dropdown">
+      <button class="btn btn-sm btn-outline-light rounded-circle" style="width:36px; height:36px;"
+              type="button" data-bs-toggle="dropdown" aria-expanded="false">
+        👤
+      </button>
+
+      <ul class="dropdown-menu dropdown-menu-end p-0" style="min-width: 220px;">
+        <li class="d-flex align-items-center gap-2 px-3 py-2 border-bottom">
+          <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-semibold"
+               style="width:40px; height:40px; background:#7a1c2e; font-size:14px; flex-shrink:0;">
+            AA
+          </div>
+          <div>
+            <div class="fw-semibold" style="font-size: 13px;">Admin Alvarez</div>
+            <div class="text-muted" style="font-size: 11px;">Administrador</div>
+          </div>
+        </li>
+        <li><button class="dropdown-item py-2" (click)="irA('/perfil')">👤 &nbsp;Mi perfil</button></li>
+        <li><button class="dropdown-item py-2" (click)="irA('/configuracion')">⚙️ &nbsp;Configuración</button></li>
+        <li><button class="dropdown-item py-2" (click)="irA('/cambiar-password')">🔒 &nbsp;Cambiar contraseña</button></li>
+        <li><button class="dropdown-item py-2" (click)="irA('/ayuda')">❓ &nbsp;Ayuda</button></li>
+        <li><hr class="dropdown-divider my-1"></li>
+        <li><button class="dropdown-item py-2 text-danger" (click)="logout()">🚪 &nbsp;Cerrar sesión</button></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<main class="dashboard-shell">
+  <section class="hero-grid">
+    <div class="hero-panel">
+      <span class="badge-custom">Dashboard empresarial</span>
+
+      <h1>Panel General</h1>
+
+      <p>
+        Bienvenido al sistema de Vitivinícolas Perú. Controle caja, almacén,
+        ventas y cuentas desde una interfaz centralizada.
+      </p>
+
+      <button class="primary-action" (click)="activarModulos()">
+        {{ mostrarModulos() ? 'Ocultar módulos' : 'Mostrar módulos' }}
+      </button>
+    </div>
+
+    <div class="stat-card">
+      <span>Producción actual</span>
+      <strong>{{ produccionActual }}</strong>
+      <p>Lotes activos en bodega</p>
+
+      <div class="progress-custom">
+        <div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="module-grid" *ngIf="mostrarModulos()">
+    <article
+      class="module-card"
+      *ngFor="let modulo of filteredModulos()"
+      [class.active]="moduloSeleccionado() === modulo.nombre"
+    >
+      <div class="module-icon">{{ modulo.icono }}</div>
+
+      <h2>{{ modulo.nombre }}</h2>
+      <p>{{ modulo.descripcion }}</p>
+
+      <a
+        [routerLink]="modulo.ruta"
+        class="module-btn"
+        (click)="selectModulo(modulo.nombre)"
+      >
+        Ingresar
+      </a>
+    </article>
+  </section>
+  <footer class="footer">
+  <div class="footer-content">
+
+    <p>© 2026 Vitivinícolas Perú - Sistema de gestión Empresarial.</p>
+
+
+  </div>
+</footer>
+</main>
