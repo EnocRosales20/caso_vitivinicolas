@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface Reporte {
   id?: number;
@@ -25,7 +26,8 @@ export interface Reporte {
   providedIn: 'root'
 })
 export class ReportesService {
-  private apiUrl = 'http://localhost:8080/api/reportes';
+  // CAMBIADO: apunta al microservicio de reportes (puerto 8083)
+  private apiUrl = `${environment.apiReportes}/reportes`;
 
   constructor(private http: HttpClient) { }
 
@@ -37,7 +39,7 @@ export class ReportesService {
     return this.http.get<Reporte[]>(this.apiUrl);
   }
 
-  eliminarReporte(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/${id}`);
+  eliminarReporte(id: number): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${this.apiUrl}/${id}`);
   }
 }

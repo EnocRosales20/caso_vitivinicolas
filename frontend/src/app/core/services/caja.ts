@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface MovimientoCaja {
   id?: number;
-  tipo: string;
+  tipo: string;      // "INGRESO" o "EGRESO"
   cuenta: string;
   monto: number;
   fecha: string;
@@ -15,8 +16,8 @@ export interface MovimientoCaja {
   providedIn: 'root',
 })
 export class CajaService {
-
-  private apiUrl = 'http://localhost:8080/caja';
+  // CAMBIADO: apunta al microservicio de caja (puerto 8081)
+  private apiUrl = `${environment.apiCaja}/caja`;
 
   constructor(private http: HttpClient) {}
 
@@ -34,5 +35,10 @@ export class CajaService {
 
   eliminarMovimiento(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  // NUEVO: Obtener saldo actual
+  getSaldo(): Observable<{ saldo: number }> {
+    return this.http.get<{ saldo: number }>(`${this.apiUrl}/saldo`);
   }
 }

@@ -34,7 +34,7 @@
     </nav>
 
     <div class="sidebar-quote">
-      <p>“Cada botella cuenta una historia de tradición, gestión y crecimiento.”</p>
+      <p>"Cada botella cuenta una historia de tradición, gestión y crecimiento."</p>
     </div>
 
     <div class="sidebar-bottom">
@@ -217,24 +217,110 @@
         </button>
       </section>
 
-      <!-- KPIS -->
-      <!-- Tarjetas de indicadores clave -->
+      <!-- ========================================== -->
+      <!-- 👈 GRÁFICOS DE MICROSERVICIOS (NUEVO) -->
+      <!-- ========================================== -->
+      <section class="charts-section" style="margin-top: 26px;">
+
+        <div class="section-title">
+          <span>📈</span>
+          <h2>Indicadores de microservicios</h2>
+          <button 
+            (click)="refrescar()" 
+            style="margin-left: auto; background: #1976d2; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 500;"
+          >
+            🔄 Refrescar
+          </button>
+        </div>
+
+        <!-- Loading -->
+        <div *ngIf="isLoading" style="text-align: center; padding: 40px; color: #7f8c8d;">
+          ⏳ Cargando datos de los microservicios...
+        </div>
+
+        <div class="charts-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
+
+          <!-- GRÁFICO 1: CAJA -->
+          <div class="chart-card" style="background: var(--card); padding: 20px; border-radius: 16px; border: 1px solid var(--border); box-shadow: var(--shadow);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <h4 style="margin: 0; color: var(--text);">💰 Caja</h4>
+              <span style="font-size: 0.7rem; color: #7f8c8d; background: #f5f5f5; padding: 2px 10px; border-radius: 12px;">puerto 8081</span>
+            </div>
+            <div style="height: 180px;">
+              <canvas baseChart
+                [data]="barChartData"
+                [options]="barChartOptions"
+                [type]="barChartType">
+              </canvas>
+            </div>
+            <div style="display: flex; gap: 15px; margin-top: 10px; justify-content: center; font-size: 0.8rem; flex-wrap: wrap;">
+              <span>💰 Ingresos: <strong style="color: #2e7d32;">S/ {{ totalIngresos | number:'1.2-2' }}</strong></span>
+              <span>💸 Egresos: <strong style="color: #c62828;">S/ {{ totalEgresos | number:'1.2-2' }}</strong></span>
+              <span>💵 Saldo: <strong style="color: #1976d2;">S/ {{ saldoCaja | number:'1.2-2' }}</strong></span>
+            </div>
+          </div>
+
+          <!-- GRÁFICO 2: CUENTAS -->
+          <div class="chart-card" style="background: var(--card); padding: 20px; border-radius: 16px; border: 1px solid var(--border); box-shadow: var(--shadow);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <h4 style="margin: 0; color: var(--text);">🏦 Cuentas Bancarias</h4>
+              <span style="font-size: 0.7rem; color: #7f8c8d; background: #f5f5f5; padding: 2px 10px; border-radius: 12px;">puerto 8082</span>
+            </div>
+            <div style="height: 160px;">
+              <canvas baseChart
+                [data]="doughnutChartData"
+                [options]="doughnutChartOptions"
+                [type]="doughnutChartType">
+              </canvas>
+            </div>
+            <div style="display: flex; gap: 15px; margin-top: 10px; justify-content: center; font-size: 0.8rem; flex-wrap: wrap;">
+              <span>🏦 Cuentas: <strong style="color: #f57c00;">{{ totalCuentas }}</strong></span>
+              <span>💰 Saldo Total: <strong style="color: #1976d2;">S/ {{ saldoTotalCuentas | number:'1.2-2' }}</strong></span>
+            </div>
+          </div>
+
+          <!-- GRÁFICO 3: REPORTES -->
+          <div class="chart-card" style="background: var(--card); padding: 20px; border-radius: 16px; border: 1px solid var(--border); box-shadow: var(--shadow);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <h4 style="margin: 0; color: var(--text);">📊 Reportes</h4>
+              <span style="font-size: 0.7rem; color: #7f8c8d; background: #f5f5f5; padding: 2px 10px; border-radius: 12px;">puerto 8083</span>
+            </div>
+            <div style="height: 160px;">
+              <canvas baseChart
+                [data]="pieChartData"
+                [options]="pieChartOptions"
+                [type]="pieChartType">
+              </canvas>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 10px; justify-content: center; font-size: 0.75rem; flex-wrap: wrap;">
+              <span>📊 Total: <strong style="color: #6a1b9a;">{{ totalReportes }}</strong></span>
+              <span style="color: #1976d2;">🔵 C: {{ reportesPorTipo['Caja'] || 0 }}</span>
+              <span style="color: #2e7d32;">🟢 A: {{ reportesPorTipo['Almacén'] || 0 }}</span>
+              <span style="color: #f57c00;">🟠 Cu: {{ reportesPorTipo['Cuentas'] || 0 }}</span>
+              <span style="color: #6a1b9a;">🟣 G: {{ reportesPorTipo['Guias'] || 0 }}</span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- KPIS ACTUALIZADOS CON DATOS REALES -->
       <section class="kpi-grid">
         <article class="kpi-card">
           <div class="kpi-icon wine">💼</div>
           <div>
-            <span>Ingresos del día</span>
-            <strong>S/ 1,200 </strong>
-            <p>↑ 12.5% vs ayer</p>
+            <span>Ingresos totales</span>
+            <strong>S/ {{ totalIngresos | number:'1.2-2' }}</strong>
+            <p>De todos los movimientos</p>
           </div>
         </article>
 
         <article class="kpi-card">
-          <div class="kpi-icon gold">🛒</div>
+          <div class="kpi-icon gold">📉</div>
           <div>
-            <span>Ventas del mes</span>
-            <strong>S/ 12,450</strong>
-            <p>↑ 8.4% vs mes anterior</p>
+            <span>Egresos totales</span>
+            <strong>S/ {{ totalEgresos | number:'1.2-2' }}</strong>
+            <p>De todos los movimientos</p>
           </div>
         </article>
 
@@ -251,8 +337,8 @@
           <div class="kpi-icon bank">🏦</div>
           <div>
             <span>Cuentas activas</span>
-            <strong>2</strong>
-            <p>Ver detalle →</p>
+            <strong>{{ totalCuentas }}</strong>
+            <p>Saldo total: S/ {{ saldoTotalCuentas | number:'1.2-2' }}</p>
           </div>
         </article>
       </section>
@@ -298,7 +384,6 @@
 
       <footer class="footer">
         <p>© 2026 Vitivinícolas Perú - Sistema de Gestión Empresarial.</p>
-
       </footer>
 
     </main>

@@ -14,11 +14,11 @@ describe('CuentasBancariasService', () => {
   beforeEach(() => {
     // Configura el módulo de pruebas con HttpClient mockeado
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],          // Importa módulo para pruebas HTTP
-      providers: [CuentasBancariasService]        // Declara el servicio a probar
+      imports: [HttpClientTestingModule],          
+      providers: [CuentasBancariasService]        
     });
-    service = TestBed.inject(CuentasBancariasService);  // Obtiene instancia del servicio
-    httpMock = TestBed.inject(HttpTestingController);   // Obtiene controlador HTTP mock
+    service = TestBed.inject(CuentasBancariasService);  
+    httpMock = TestBed.inject(HttpTestingController);   
   });
 
   

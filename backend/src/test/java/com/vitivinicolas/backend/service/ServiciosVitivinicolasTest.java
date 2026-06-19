@@ -13,11 +13,11 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
-// Clase de pruebas unitarias para servicios vitivinícolas
+
 public class ServiciosVitivinicolasTest {
 
     
-    // MOCKS PARA CAJA - Simulan repositorios y servicios de caja
+    // MOCKS PARA CAJA 
     
     @InjectMocks  
     private CajaService cajaService;
@@ -26,7 +26,7 @@ public class ServiciosVitivinicolasTest {
     private MovimientoCajaRepository movimientoCajaRepository;
 
    
-    // MOCKS PARA CUENTAS BANCARIAS - Simulan operaciones bancarias
+    // MOCKS PARA CUENTAS BANCARIAS 
     
     @InjectMocks
     private CuentaBancariaService cuentaBancariaService;
@@ -35,7 +35,7 @@ public class ServiciosVitivinicolasTest {
     private CuentaBancariaRepository cuentaBancariaRepository;
 
     
-    // MOCKS PARA REPORTES - Simulan generación y gestión de reportes
+    // MOCKS 
     
     @InjectMocks
     private ReporteService reporteService;
@@ -43,7 +43,7 @@ public class ServiciosVitivinicolasTest {
     @Mock
     private ReporteRepository reporteRepository;
 
-    @Mock  // Mock adicional para productos en reportes de almacén
+    @Mock  // para productos en reportes de almacén
     private ProductoRepository productoRepository;
 
     // Configuración inicial antes de cada prueba

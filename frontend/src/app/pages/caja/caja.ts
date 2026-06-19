@@ -17,7 +17,7 @@ export class CajaComponent implements OnInit {
   movimientos: MovimientoCaja[] = [];
 
   movimiento: MovimientoCaja = {
-    tipo: '',
+    tipo: 'Depósito',  // 👈 CAMBIADO: valor por defecto
     cuenta: '',
     monto: 0,
     fecha: '',
@@ -31,6 +31,10 @@ export class CajaComponent implements OnInit {
   totalRetiros = 0;
   saldoCaja = 0;
 
+  // 👈 NUEVO: para mostrar loading y errores
+  isLoading = false;
+  errorMessage = '';
+
   constructor(private cajaService: CajaService) {}
 
   ngOnInit(): void {
@@ -38,13 +42,23 @@ export class CajaComponent implements OnInit {
   }
 
   cargarMovimientos(): void {
+    this.isLoading = true;
+    this.errorMessage = '';
+    
+    console.log('🔄 Cargando movimientos...');  // 👈 LOG
+
     this.cajaService.listarMovimientos().subscribe({
       next: (data) => {
+        console.log('✅ Movimientos recibidos:', data);  // 👈 LOG
         this.movimientos = data;
         this.calcularTotales();
+        this.isLoading = false;
       },
-      error: () => {
-        alert('Error al cargar movimientos');
+      error: (err) => {
+        console.error('❌ Error al cargar movimientos:', err);  // 👈 LOG
+        this.errorMessage = 'Error al cargar movimientos. Verifica que el backend esté corriendo.';
+        this.isLoading = false;
+        alert('Error al cargar movimientos. Revisa la consola (F12) para más detalles.');
       }
     });
   }
@@ -59,6 +73,12 @@ export class CajaComponent implements OnInit {
       .reduce((sum, m) => sum + Number(m.monto), 0);
 
     this.saldoCaja = this.totalIngresos - this.totalRetiros;
+
+    console.log('📊 Totales calculados:', {  // 👈 LOG
+      totalIngresos: this.totalIngresos,
+      totalRetiros: this.totalRetiros,
+      saldoCaja: this.saldoCaja
+    });
   }
 
   registrarMovimiento(): void {
@@ -78,14 +98,18 @@ export class CajaComponent implements OnInit {
       return;
     }
 
+    console.log('📝 Registrando movimiento:', this.movimiento);  // 👈 LOG
+
     this.cajaService.registrarMovimiento(this.movimiento).subscribe({
-      next: () => {
+      next: (response) => {
+        console.log('✅ Movimiento creado:', response);  // 👈 LOG
         alert('Movimiento registrado correctamente');
         this.limpiarFormulario();
         this.cargarMovimientos();
       },
-      error: () => {
-        alert('Error al registrar movimiento');
+      error: (err) => {
+        console.error('❌ Error al registrar:', err);  // 👈 LOG
+        alert('Error al registrar movimiento. Revisa la consola (F12).');
       }
     });
   }
@@ -106,16 +130,20 @@ export class CajaComponent implements OnInit {
   actualizarMovimiento(): void {
     if (!this.idEditando) return;
 
+    console.log('📝 Actualizando movimiento:', this.idEditando, this.movimiento);  // 👈 LOG
+
     this.cajaService.actualizarMovimiento(
       this.idEditando,
       this.movimiento
     ).subscribe({
       next: () => {
+        console.log('✅ Movimiento actualizado');  // 👈 LOG
         alert('Movimiento actualizado correctamente');
         this.limpiarFormulario();
         this.cargarMovimientos();
       },
-      error: () => {
+      error: (err) => {
+        console.error('❌ Error al actualizar:', err);  // 👈 LOG
         alert('Error al actualizar movimiento');
       }
     });
@@ -127,12 +155,16 @@ export class CajaComponent implements OnInit {
     const confirmar = confirm('¿Seguro que deseas eliminar este movimiento?');
     if (!confirmar) return;
 
+    console.log('🗑️ Eliminando movimiento:', id);  // 👈 LOG
+
     this.cajaService.eliminarMovimiento(id).subscribe({
       next: () => {
+        console.log('✅ Movimiento eliminado');  // 👈 LOG
         alert('Movimiento eliminado');
         this.cargarMovimientos();
       },
-      error: () => {
+      error: (err) => {
+        console.error('❌ Error al eliminar:', err);  // 👈 LOG
         alert('Error al eliminar movimiento');
       }
     });
@@ -140,7 +172,7 @@ export class CajaComponent implements OnInit {
 
   limpiarFormulario(): void {
     this.movimiento = {
-      tipo: '',
+      tipo: 'Depósito',  // 👈 CAMBIADO: valor por defecto
       cuenta: '',
       monto: 0,
       fecha: '',
