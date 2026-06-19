@@ -3,4 +3,5 @@ com\vitivinicolas\backend\dto\ProductoDTO.class
 com\vitivinicolas\backend\GuiaAlmacenApplication.class
 com\vitivinicolas\backend\repository\GuiaAlmacenRepository.class
 com\vitivinicolas\backend\service\GuiaAlmacenService.class
+com\vitivinicolas\backend\controller\GuiaAlmacenController.class
 com\vitivinicolas\backend\config\WebClientConfig.class

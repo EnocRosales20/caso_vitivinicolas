@@ -90,6 +90,29 @@
     </section>
 
     <section class="table-card">
+      
+      <div class="card-grafico" style="background: #fafafa; padding: 15px; border-radius: 8px; border: 1px solid #e0e0e0; margin-bottom: 20px;">
+        <h3 style="margin-top: 0; color: #444; font-size: 1.1rem; margin-bottom: 15px; font-family: sans-serif; font-weight: 600;">
+          Balance Operativo (Ingresos vs Salidas)
+        </h3>
+        
+        <div *ngIf="guias.length > 0; else sinDatosGrafico">
+          <apx-chart
+            [series]="chartOptions.series"
+            [chart]="chartOptions.chart"
+            [labels]="chartOptions.labels"
+            [colors]="chartOptions.colors"
+            [responsive]="chartOptions.responsive">
+          </apx-chart>
+        </div>
+        
+        <ng-template #sinDatosGrafico>
+          <p style="color: #888; font-style: italic; font-size: 0.9rem; text-center: center; margin: 10px 0;">
+            No hay suficientes datos registrados para generar métricas.
+          </p>
+        </ng-template>
+      </div>
+
       <div class="card-header">
         <h2>Historial de Movimientos Recientes</h2>
       </div>

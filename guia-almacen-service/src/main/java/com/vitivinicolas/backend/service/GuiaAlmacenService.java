@@ -15,87 +15,125 @@ import java.util.List;
 public class GuiaAlmacenService {
 
     @Autowired
-    private GuiaAlmacenRepository guiaRepository;
+    private GuiaAlmacenRepository staticGuiaRepository;
 
     @Autowired
-    private WebClient inventoryWebClient; // El cliente HTTP que creamos en WebClientConfig
+    private WebClient inventoryWebClient; // Conectado a http://localhost:8081
 
+    /**
+     * 🔄 Listar guías locales
+     */
     public List<GuiaAlmacen> listarTodas() {
-        return guiaRepository.findAll();
+        return staticGuiaRepository.findAll();
     }
 
-    @Transactional
-    public GuiaAlmacen guardar(GuiaAlmacen guia) {
-        String nombreProducto = extraerDato(guia.getMotivo(), "Prod:");
-        int cantidadMovimiento = Integer.parseInt(guia.getEncargado());
+    /**
+     * 🔄 Guardar operación unificando stocks remotos
+     */
+    public GuiaAlmacen guardar(GuiaAlmacen staticGuia) {
+        int cantidadMovimiento = 0;
 
-        // 1. DETECTAR SI ES PRODUCTO NUEVO O EXISTENTE
-        if (guia.getMotivo().contains("Cat:")) {
-            // ¡Es un producto nuevo! Construimos el DTO para mandarlo por POST al microservicio de inventario
-            ProductoDTO nuevoProducto = new ProductoDTO();
-            nuevoProducto.setNombre(nombreProducto);
-            nuevoProducto.setCategoria(extraerDato(guia.getMotivo(), "Cat:"));
-            nuevoProducto.setUbicacion(extraerDato(guia.getMotivo(), "Ubic:"));
-            nuevoProducto.setStock(cantidadMovimiento);
-            
-            String codigoAutogenerado = "VIN-" + String.format("%03d", (int)(Math.random() * 900) + 100);
-            nuevoProducto.setCodigo(codigoAutogenerado);
-
-            // Llamada remota POST
-            inventoryWebClient.post()
-                    .body(Mono.just(nuevoProducto), ProductoDTO.class)
-                    .retrieve()
-                    .bodyToMono(ProductoDTO.class)
-                    .block(); // .block() hace que espere la respuesta sincrónicamente como en el monolito
-
-        } else {
-            // ¡Es un producto existente! Lo buscamos mediante un GET remoto por su nombre
-            // IMPORTANTE: Tu inventory-service debe soportar buscar por nombre en su endpoint
-            ProductoDTO producto = inventoryWebClient.get()
-                    .uri(uriBuilder -> uriBuilder.path("/buscar").queryParam("nombre", nombreProducto).build())
-                    .retrieve()
-                    .onStatus(status -> status.is4xxClientError(), response -> 
-                        Mono.error(new RuntimeException("El producto '" + nombreProducto + "' no existe en el inventario remoto.")))
-                    .bodyToMono(ProductoDTO.class)
-                    .block();
-
-            // 2. Modificar el stock sumando o restando
-            if (guia.getTipoMovimiento().equalsIgnoreCase("Compra") || guia.getTipoMovimiento().equalsIgnoreCase("Ingreso")) {
-                producto.setStock(producto.getStock() + cantidadMovimiento);
-            } else if (guia.getTipoMovimiento().equalsIgnoreCase("Venta") || guia.getTipoMovimiento().equalsIgnoreCase("Salida")) {
-                if (producto.getStock() < cantidadMovimiento) {
-                    throw new RuntimeException("Stock insuficiente en Inventario para " + nombreProducto + ". Disponible: " + producto.getStock());
-                }
-                producto.setStock(producto.getStock() - cantidadMovimiento);
-            }
-            
-            // 3. Enviamos un PUT remoto para actualizar el stock modificado en el microservicio de inventario
-            inventoryWebClient.put()
-                    .uri("/{id}", producto.getId())
-                    .body(Mono.just(producto), ProductoDTO.class)
-                    .retrieve()
-                    .bodyToMono(ProductoDTO.class)
-                    .block();
+        // 1. Validar y parsear la cantidad enviada en el campo encargado
+        try {
+            cantidadMovimiento = Integer.parseInt(staticGuia.getEncargado().trim());
+        } catch (NumberFormatException e) {
+            throw new RuntimeException("La cantidad enviada en el campo 'encargado' (" + staticGuia.getEncargado() + ") no es un número válido.");
         }
 
-        // 4. Guardar el historial local de la guía en la tabla 'guia_almacen'
-        return guiaRepository.save(guia);
+        try {
+            // 2. EVALUAR SI ES PRODUCTO NUEVO O EXISTENTE
+            if (staticGuia.getMotivo().contains("Cat:")) {
+                // Caso: PRODUCTO NUEVO
+                String nombreNuevo = extraerDato(staticGuia.getMotivo(), "Prod:").trim();
+                
+                ProductoDTO nuevoProducto = new ProductoDTO();
+                nuevoProducto.setNombre(nombreNuevo.equals("N/A") ? "Nuevo Vino Registrado" : nombreNuevo);
+                nuevoProducto.setCategoria(extraerDato(staticGuia.getMotivo(), "Cat:"));
+                nuevoProducto.setUbicacion(extraerDato(staticGuia.getMotivo(), "Ubic:"));
+                nuevoProducto.setStock(cantidadMovimiento);
+                nuevoProducto.setCodigo("VIN-" + String.format("%03d", (int)(Math.random() * 900) + 100));
+
+                // POST Remoto al inventario usando la ruta completa
+                inventoryWebClient.post()
+                        .uri("/api/productos")
+                        .body(Mono.just(nuevoProducto), ProductoDTO.class)
+                        .retrieve()
+                        .bodyToMono(ProductoDTO.class)
+                        .block();
+
+            } else {
+                // Caso: PRODUCTO EXISTENTE (Licor de Naranja, Malbec, etc)
+                String nombreLimpio = extraerDato(staticGuia.getMotivo(), "Prod:").trim();
+                System.out.println("🚀 Buscando en inventario remoto el producto exacto: [" + nombreLimpio + "]");
+                
+                // 🎯 RUTA CORREGIDA: Apunta exactamente al endpoint mapeado en tu Inventario
+                ProductoDTO producto = inventoryWebClient.get()
+                        .uri(uriBuilder -> uriBuilder
+                                .path("/api/productos/buscar-por-nombre")
+                                .queryParam("nombre", nombreLimpio)
+                                .build())
+                        .retrieve()
+                        .onStatus(status -> status.is4xxClientError(), response -> 
+                            Mono.error(new RuntimeException("El producto '" + nombreLimpio + "' no existe en el catálogo de inventario (404).")))
+                        .onStatus(status -> status.is5xxServerError(), response -> 
+                            Mono.error(new RuntimeException("Error interno en el servidor de inventario (500).")))
+                        .bodyToMono(ProductoDTO.class)
+                        .block();
+
+                if (producto == null) {
+                    throw new RuntimeException("El microservicio de inventario devolvió un objeto vacío para: " + nombreLimpio);
+                }
+
+                // 3. MODIFICAR STOCK SEGÚN EL TIPO DE MOVIMIENTO
+                String tipo = staticGuia.getTipoMovimiento();
+                if (tipo.equalsIgnoreCase("Compra") || tipo.equalsIgnoreCase("Ingreso") || tipo.equalsIgnoreCase("INGRESO")) {
+                    producto.setStock(producto.getStock() + cantidadMovimiento);
+                } else if (tipo.equalsIgnoreCase("Venta") || tipo.equalsIgnoreCase("Salida") || tipo.equalsIgnoreCase("SALIDA")) {
+                    if (producto.getStock() < cantidadMovimiento) {
+                        throw new RuntimeException("Stock insuficiente en Inventario para " + nombreLimpio + ". Disponible: " + producto.getStock());
+                    }
+                    producto.setStock(producto.getStock() - cantidadMovimiento);
+                }
+                
+                System.out.println("💾 Actualizando stock del producto ID: " + producto.getId() + " a un nuevo valor de: " + producto.getStock());
+
+                // 4. ENVIAR PUT REMOTO PARA ACTUALIZAR EL NUEVO STOCK EN EL INVENTARIO
+                inventoryWebClient.put()
+                        .uri("/api/productos/{id}", producto.getId())
+                        .body(Mono.just(producto), ProductoDTO.class)
+                        .retrieve()
+                        .bodyToMono(ProductoDTO.class)
+                        .block();
+            }
+
+            // 5. GUARDAR EN LA BASE DE DATOS LOCAL
+            return guardarLocal(staticGuia);
+
+        } catch (Exception e) {
+            System.err.println("❌ EXCEPCIÓN EN GUIA-SERVICE: " + e.getMessage());
+            throw new RuntimeException("Fallo de comunicación entre microservicios: " + e.getMessage());
+        }
     }
 
     @Transactional
-    public GuiaAlmacen actualizar(Long id, GuiaAlmacen guiaDetalles) {
-        GuiaAlmacen staticGuia = guiaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Guía no encontrada con id: " + id));
-        staticGuia.setNroGuia(guiaDetalles.getNroGuia());
-        staticGuia.setTipoMovimiento(guiaDetalles.getTipoMovimiento());
-        staticGuia.setEncargado(guiaDetalles.getEncargado());
-        staticGuia.setMotivo(guiaDetalles.getMotivo());
-        return guiaRepository.save(staticGuia);
+    public GuiaAlmacen guardarLocal(GuiaAlmacen staticGuia) {
+        return staticGuiaRepository.save(staticGuia);
     }
 
     @Transactional
     public void eliminar(Long id) {
-        guiaRepository.deleteById(id);
+        staticGuiaRepository.deleteById(id);
+    }
+
+    @Transactional
+    public GuiaAlmacen actualizar(Long id, GuiaAlmacen staticGuiaDetalles) {
+        GuiaAlmacen staticGuia = staticGuiaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Guía no encontrada con id: " + id));
+        staticGuia.setNroGuia(staticGuiaDetalles.getNroGuia());
+        staticGuia.setTipoMovimiento(staticGuiaDetalles.getTipoMovimiento());
+        staticGuia.setEncargado(staticGuiaDetalles.getEncargado());
+        staticGuia.setMotivo(staticGuiaDetalles.getMotivo());
+        return staticGuiaRepository.save(staticGuia);
     }
 
     private String extraerDato(String motivo, String etiqueta) {
@@ -106,6 +144,9 @@ public class GuiaAlmacenService {
                 if (parte.trim().startsWith(etiqueta)) {
                     return parte.replace(etiqueta, "").trim();
                 }
+            }
+            if (motivo.contains(etiqueta)) {
+                return motivo.substring(motivo.indexOf(etiqueta) + etiqueta.length()).trim();
             }
         } catch (Exception e) {
             return "Error al parsear";

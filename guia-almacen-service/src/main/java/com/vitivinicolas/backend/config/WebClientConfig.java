@@ -9,9 +9,8 @@ public class WebClientConfig {
 
     @Bean
     public WebClient inventoryWebClient() {
-        // Apunta al puerto 8081 del microservicio de inventario que ya tienes corriendo
         return WebClient.builder()
-                .baseUrl("http://localhost:8081/api/productos") 
+                .baseUrl("http://localhost:8081") 
                 .build();
     }
 }

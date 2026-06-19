@@ -1,63 +1,81 @@
 package com.vitivinicolas.inventory.controller;
 
-import org.springframework.web.bind.annotation.*;
-import java.util.List;
 import com.vitivinicolas.inventory.model.Producto;
 import com.vitivinicolas.inventory.repository.ProductoRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
-@RequestMapping("/api/productos") // Mapeo estándar para microservicios
-@CrossOrigin(origins = "http://localhost:4200") // Permiso directo a tu Angular
+@RequestMapping("/api/productos")
+@CrossOrigin(origins = "http://localhost:4200")
 public class ProductoController {
 
-    private final ProductoRepository repo;
+    @Autowired
+    private ProductoRepository productoRepository;
 
-    public ProductoController(ProductoRepository repo) {
-        this.repo = repo;
-    }
-
+    /**
+     * 📊 1. RUTA RAÍZ (GET /api/productos): Usada por la gráfica circular al cargar el dashboard.
+     * Trae la lista completa sin restricciones para no romper las porciones del gráfico.
+     */
     @GetMapping
-    public List<Producto> listarTodos() {
-        return repo.findAll();
+    public ResponseEntity<List<Producto>> listarTodos() {
+        System.out.println("📊 Gráfica solicitando la carga masiva del catálogo.");
+        List<Producto> lista = productoRepository.findAll();
+        return ResponseEntity.ok(lista);
     }
 
-    @GetMapping("/produccion-actual")
-    public int obtenerProduccionActual() {
-        return repo.findAll()
-                .stream()
-                .mapToInt(Producto::getStock)
-                .sum();
-    }
-
+    /**
+     * 🔍 2. RUTA DE FILTRADO (GET /api/productos/filtrar): ¡EXCLUSIVA PARA TU TABLA DE CONSULTA!
+     * Resuelve el error 405 mapeando la petición del botón "Consultar" de Angular.
+     */
     @GetMapping("/filtrar")
-    public List<Producto> filtrar(
-            @RequestParam(defaultValue = "") String nombre,
-            @RequestParam(defaultValue = "") String categoria,
-            @RequestParam(defaultValue = "") String ubicacion
-    ) {
-        return repo.findByNombreContainingIgnoreCaseAndCategoriaContainingIgnoreCaseAndUbicacionContainingIgnoreCase(
-                nombre, categoria, ubicacion);
-    }
-
-    // NUEVO ENDPOINT INTER-SERVICIO: Permite buscar si el vino existe usando el nombre
-    @GetMapping("/buscar-por-nombre")
-    public Producto obtenerPorNombre(@RequestParam String nombre) {
-        return repo.findByNombre(nombre)
-                .orElseThrow(() -> new RuntimeException("Vino no encontrado en el catálogo"));
-    }
-
-    @PutMapping("/{id}/stock")
-    public Producto actualizarStock(@PathVariable Long id, @RequestBody int cantidad) {
-        Producto producto = repo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+    public ResponseEntity<List<Producto>> filtrarProductos(
+            @RequestParam(value = "nombre", required = false, defaultValue = "") String nombre,
+            @RequestParam(value = "categoria", required = false, defaultValue = "") String categoria,
+            @RequestParam(value = "ubicacion", required = false, defaultValue = "") String ubicacion) {
         
-        producto.setStock(cantidad);
-        return repo.save(producto);
+        System.out.println("🔍 Buscador de Tabla procesando filtros -> Producto: [" + nombre + "], Categoría: [" + categoria + "], Almacén: [" + ubicacion + "]");
+        
+        List<Producto> filtrados = productoRepository.findByNombreContainingIgnoreCaseAndCategoriaContainingIgnoreCaseAndUbicacionContainingIgnoreCase(
+                nombre.trim(), categoria.trim(), ubicacion.trim()
+        );
+        
+        return ResponseEntity.ok(filtrados);
     }
 
-    // NUEVO ENDPOINT INTER-SERVICIO: Permite registrar un vino desde el servicio de guías si es nuevo
-    @PostMapping
-    public Producto crearProducto(@RequestBody Producto nuevoProducto) {
-        return repo.save(nuevoProducto);
+    /**
+     * 🎯 3. RUTA DE VALIDACIÓN (GET /api/productos/buscar-por-nombre): Usada por las guías de almacén.
+     * Devuelve un objeto único estricto para procesar incrementos/decrementos de stock de forma segura.
+     */
+    @GetMapping("/buscar-por-nombre")
+    public ResponseEntity<Producto> buscarParaGuia(@RequestParam("nombre") String nombre) {
+        String nombreLimpio = nombre.trim();
+        System.out.println("🎯 Guía de Almacén buscando coincidencia exacta para: [" + nombreLimpio + "]");
+        
+        return productoRepository.findByNombre(nombreLimpio)
+                .map(producto -> ResponseEntity.ok(producto))
+                .orElseGet(() -> {
+                    System.out.println("❌ Error: '" + nombreLimpio + "' no existe en las tablas de Postgres.");
+                    return ResponseEntity.status(404).build();
+                });
+    }
+
+    /**
+     * 💾 4. RUTA DE ACTUALIZACIÓN (PUT /api/productos/{id}): Sincroniza los nuevos saldos físicos.
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<Producto> actualizarProducto(@PathVariable("id") Long id, @RequestBody Producto productoDetalles) {
+        System.out.println("💾 Remoto solicitando actualizar stock para el ID: " + id + " a: " + productoDetalles.getStock());
+        
+        return productoRepository.findById(id)
+                .map(productoExistente -> {
+                    productoExistente.setStock(productoDetalles.getStock());
+                    Producto productoActualizado = productoRepository.save(productoExistente);
+                    return ResponseEntity.ok(productoActualizado);
+                })
+                .orElseGet(() -> ResponseEntity.status(404).build());
     }
 }
