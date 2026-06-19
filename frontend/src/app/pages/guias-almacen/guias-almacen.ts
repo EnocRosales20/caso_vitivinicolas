@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common'; // <-- Corregido el módulo que 
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { GuiasAlmacenService, GuiaAlmacenBackend } from './guias-almacen.service';
+import { AlmacenService } from '../../core/services/almacen.service'; // <-- Inyectamos el servicio de inventario
 
 @Component({
   selector: 'app-guias-almacen',
@@ -31,7 +32,10 @@ export class GuiasAlmacen implements OnInit {
     ubicacion: 'Cava Principal'
   };
 
-  constructor(private guiasService: GuiasAlmacenService) {}
+  constructor(
+    private guiasService: GuiasAlmacenService,
+    private almacenService: AlmacenService 
+  ) {}
 
   ngOnInit(): void {
     this.cargarGuias();
@@ -39,18 +43,17 @@ export class GuiasAlmacen implements OnInit {
   }
 
   cargarProductosReal(): void {
-    // Sincronizado exactamente con los nombres de la tabla public.producto en tu pgAdmin
-    this.productos = [
-      { nombre: 'Malbec Gran Reserva' },
-      { nombre: 'Cabernet Sauvignon' },
-      { nombre: 'Merlot Clasico' },
-      { nombre: 'Syrah Especial' },
-      { nombre: 'Carmenere Reserva' },
-      { nombre: 'Pinot Noir Suave' },
-      { nombre: 'Tannat Robusto' },
-      { nombre: 'Bonarda Joven' },
-      { nombre: 'Sangiovese Italiano' }
-    ];
+    // CAMBIO CLAVE: Ahora trae los productos reales del Microservicio de Inventario (Puerto 8081)
+    this.almacenService.listarTodos().subscribe({
+      next: (data) => {
+        this.productos = data;
+      },
+      error: (err) => {
+        console.error('Error al recuperar productos remotos:', err);
+        // Respaldo por si el microservicio de inventario está apagado en la prueba
+        this.productos = [{ nombre: 'Malbec Gran Reserva' }, { nombre: 'Cabernet Sauvignon' }];
+      }
+    });
   }
   
   cargarGuias(): void {
@@ -109,6 +112,7 @@ export class GuiasAlmacen implements OnInit {
     this.guiasService.crear(nuevaGuia).subscribe({
       next: () => {
         this.cargarGuias(); // Refresca instantáneamente el historial de la derecha
+        this.cargarProductosReal(); // Refresca el stock real del inventario después de cada movimiento
         this.limpiarFormulario();
         this.esProductoNuevo = false; // Resetea el interruptor visual
       },

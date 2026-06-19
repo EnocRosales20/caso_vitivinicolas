@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 // REVISAR: Tiene que decir "export interface" obligatoriamente
 export interface GuiaAlmacenBackend {
@@ -16,7 +17,7 @@ export interface GuiaAlmacenBackend {
   providedIn: 'root'
 })
 export class GuiasAlmacenService {
-  private apiUrl = 'http://localhost:8080/api/guias-almacen';
+  private apiUrl = environment.guiasAlmacenApiUrl;
 
   constructor(private http: HttpClient) {}
 
