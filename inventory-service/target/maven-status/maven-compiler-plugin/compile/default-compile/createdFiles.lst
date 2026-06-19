@@ -1,0 +1,4 @@
+com\vitivinicolas\inventory\repository\ProductoRepository.class
+com\vitivinicolas\inventory\controller\ProductoController.class
+com\vitivinicolas\inventory\InventoryServiceApplication.class
+com\vitivinicolas\inventory\model\Producto.class
