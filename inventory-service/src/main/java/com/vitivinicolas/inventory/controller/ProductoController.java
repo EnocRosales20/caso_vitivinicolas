@@ -17,12 +17,12 @@ public class ProductoController {
     private ProductoRepository productoRepository;
 
     /**
-     * 📊 1. RUTA RAÍZ (GET /api/productos): Usada por la gráfica circular al cargar el dashboard.
+     * 1. RUTA RAÍZ (GET /api/productos): Usada por la gráfica circular al cargar el dashboard.
      * Trae la lista completa sin restricciones para no romper las porciones del gráfico.
      */
     @GetMapping
     public ResponseEntity<List<Producto>> listarTodos() {
-        System.out.println("📊 Gráfica solicitando la carga masiva del catálogo.");
+        System.out.println("Gráfica solicitando la carga masiva del catálogo.");
         List<Producto> lista = productoRepository.findAll();
         return ResponseEntity.ok(lista);
     }
@@ -47,28 +47,28 @@ public class ProductoController {
     }
 
     /**
-     * 🎯 3. RUTA DE VALIDACIÓN (GET /api/productos/buscar-por-nombre): Usada por las guías de almacén.
+     * 3. RUTA DE VALIDACIÓN (GET /api/productos/buscar-por-nombre): Usada por las guías de almacén.
      * Devuelve un objeto único estricto para procesar incrementos/decrementos de stock de forma segura.
      */
     @GetMapping("/buscar-por-nombre")
     public ResponseEntity<Producto> buscarParaGuia(@RequestParam("nombre") String nombre) {
         String nombreLimpio = nombre.trim();
-        System.out.println("🎯 Guía de Almacén buscando coincidencia exacta para: [" + nombreLimpio + "]");
+        System.out.println("Guía de Almacén buscando coincidencia exacta para: [" + nombreLimpio + "]");
         
         return productoRepository.findByNombre(nombreLimpio)
                 .map(producto -> ResponseEntity.ok(producto))
                 .orElseGet(() -> {
-                    System.out.println("❌ Error: '" + nombreLimpio + "' no existe en las tablas de Postgres.");
+                    System.out.println(" Error: '" + nombreLimpio + "' no existe en las tablas de Postgres.");
                     return ResponseEntity.status(404).build();
                 });
     }
 
     /**
-     * 💾 4. RUTA DE ACTUALIZACIÓN (PUT /api/productos/{id}): Sincroniza los nuevos saldos físicos.
+     * 4. RUTA DE ACTUALIZACIÓN (PUT /api/productos/{id}): Sincroniza los nuevos saldos físicos.
      */
     @PutMapping("/{id}")
     public ResponseEntity<Producto> actualizarProducto(@PathVariable("id") Long id, @RequestBody Producto productoDetalles) {
-        System.out.println("💾 Remoto solicitando actualizar stock para el ID: " + id + " a: " + productoDetalles.getStock());
+        System.out.println("Remoto solicitando actualizar stock para el ID: " + id + " a: " + productoDetalles.getStock());
         
         return productoRepository.findById(id)
                 .map(productoExistente -> {

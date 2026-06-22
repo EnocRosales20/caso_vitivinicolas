@@ -4,12 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { GuiasAlmacenService, GuiaAlmacenBackend } from './guias-almacen.service';
 import { AlmacenService } from '../../core/services/almacen.service'; 
-import { NgApexchartsModule } from 'ng-apexcharts'; // <-- 1. IMPORTANTE: Agrega esta línea
+import { NgApexchartsModule } from 'ng-apexcharts';
 
 @Component({
   selector: 'app-guias-almacen',
   standalone: true,
-  imports: [CommonModule, FormsModule, HttpClientModule, NgApexchartsModule], // <-- 2. IMPORTANTE: Agrega NgApexchartsModule aquí
+  imports: [CommonModule, FormsModule, HttpClientModule, NgApexchartsModule], // 
   templateUrl: './guias-almacen.html',
   styleUrl: './guias-almacen.scss',
   providers: [GuiasAlmacenService]
@@ -19,16 +19,16 @@ export class GuiasAlmacen implements OnInit {
   guias: any[] = [];
   esProductoNuevo: boolean = false; 
 
-  // 3. COPIA ESTE OBJETO COMPLETO: Configuración inicial del gráfico
+  // 3. 
   public chartOptions: any = {
-    series: [0, 0, 0], // Inicia en cero, se actualizará dinámicamente
+    series: [0, 0, 0], // 
     chart: {
       type: 'donut',
       width: '100%',
       height: 300
     },
     labels: ['Ingresos / Compras', 'Salidas / Ventas', 'Traslados'],
-    colors: ['#2e7d32', '#c62828', '#0288d1'], // Verde, Rojo, Azul
+    colors: ['#2e7d32', '#c62828', '#0288d1'], 
     responsive: [{
       breakpoint: 480,
       options: {

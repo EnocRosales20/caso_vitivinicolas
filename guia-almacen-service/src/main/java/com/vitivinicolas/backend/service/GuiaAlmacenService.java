@@ -21,14 +21,14 @@ public class GuiaAlmacenService {
     private WebClient inventoryWebClient; // Conectado a http://localhost:8081
 
     /**
-     * 🔄 Listar guías locales
+     * Listar guías locales
      */
     public List<GuiaAlmacen> listarTodas() {
         return staticGuiaRepository.findAll();
     }
 
     /**
-     * 🔄 Guardar operación unificando stocks remotos
+     * Guardar operación unificando stocks remotos
      */
     public GuiaAlmacen guardar(GuiaAlmacen staticGuia) {
         int cantidadMovimiento = 0;
@@ -64,9 +64,9 @@ public class GuiaAlmacenService {
             } else {
                 // Caso: PRODUCTO EXISTENTE (Licor de Naranja, Malbec, etc)
                 String nombreLimpio = extraerDato(staticGuia.getMotivo(), "Prod:").trim();
-                System.out.println("🚀 Buscando en inventario remoto el producto exacto: [" + nombreLimpio + "]");
+                System.out.println("Buscando en inventario remoto el producto exacto: [" + nombreLimpio + "]");
                 
-                // 🎯 RUTA CORREGIDA: Apunta exactamente al endpoint mapeado en tu Inventario
+                // RUTA CORREGIDA: Apunta exactamente al endpoint mapeado en tu Inventario
                 ProductoDTO producto = inventoryWebClient.get()
                         .uri(uriBuilder -> uriBuilder
                                 .path("/api/productos/buscar-por-nombre")
@@ -95,7 +95,7 @@ public class GuiaAlmacenService {
                     producto.setStock(producto.getStock() - cantidadMovimiento);
                 }
                 
-                System.out.println("💾 Actualizando stock del producto ID: " + producto.getId() + " a un nuevo valor de: " + producto.getStock());
+                System.out.println("Actualizando stock del producto ID: " + producto.getId() + " a un nuevo valor de: " + producto.getStock());
 
                 // 4. ENVIAR PUT REMOTO PARA ACTUALIZAR EL NUEVO STOCK EN EL INVENTARIO
                 inventoryWebClient.put()

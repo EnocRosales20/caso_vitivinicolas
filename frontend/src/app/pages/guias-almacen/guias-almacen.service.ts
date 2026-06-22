@@ -20,17 +20,17 @@ export class GuiasAlmacenService {
 
   constructor(private http: HttpClient) {}
 
-  // 🔄 ALINEADO CON @GetMapping
+  // ALINEADO CON @GetMapping
   listar(): Observable<GuiaAlmacenBackend[]> {
     return this.http.get<GuiaAlmacenBackend[]>(this.apiUrl);
   }
 
-  // 🔄 ALINEADO CON @PostMapping (crearGuia)
+  // ALINEADO CON @PostMapping (crearGuia)
   crear(guia: GuiaAlmacenBackend): Observable<GuiaAlmacenBackend> {
     return this.http.post<GuiaAlmacenBackend>(this.apiUrl, guia);
   }
 
-  // 🔄 ALINEADO CON @DeleteMapping
+  // ALINEADO CON @DeleteMapping
   eliminar(id: number): Observable<string> {
     return this.http.delete(`${this.apiUrl}/${id}`, { responseType: 'text' });
   }
